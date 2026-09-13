@@ -58,6 +58,8 @@
 
 import { generateAtomFeed, generateRssFeed, generateJsonFeed, parseFeed as parseFeedSmith } from "feedsmith";
 import { handleArticle } from "./article";
+import { readCapped } from "./read-capped";
+export { readCapped } from "./read-capped";
 import { assertOutboundUrlAllowed, hostAllowed as policyHostAllowed } from "./outbound-policy.js";
 
 export interface Env {
@@ -801,38 +803,6 @@ async function fetchText(target: string, timeoutMs: number, env: Env): Promise<s
   } finally {
     clearTimeout(t);
   }
-}
-
-export async function readCapped(res: Response, maxBytes: number): Promise<string> {
-  const reader = res.body?.getReader();
-  if (!reader) return (await res.text()).slice(0, maxBytes);
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (value) {
-      const remaining = maxBytes - total;
-      if (value.length > remaining) {
-        if (remaining > 0) chunks.push(value.subarray(0, remaining));
-        await reader.cancel();
-        break;
-      }
-      chunks.push(value);
-      total += value.length;
-      if (total === maxBytes) { await reader.cancel(); break; }
-    }
-  }
-  return new TextDecoder().decode(concat(chunks));
-}
-
-function concat(chunks: Uint8Array[]): Uint8Array {
-  let len = 0;
-  for (const c of chunks) len += c.length;
-  const out = new Uint8Array(len);
-  let off = 0;
-  for (const c of chunks) { out.set(c, off); off += c.length; }
-  return out;
 }
 
 async function fetchFeed(feedUrl: string, env: Env): Promise<NewsItem[]> {
