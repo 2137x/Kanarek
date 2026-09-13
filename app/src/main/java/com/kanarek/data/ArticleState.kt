@@ -200,8 +200,10 @@ internal object SavedArticleCodec {
         decodeRecords(records).map(SavedArticleRecord::item)
 
     fun decodeRecords(records: Set<String>): List<SavedArticleRecord> =
+        normalizeRecords(records.mapNotNull(::decodeRecord))
+
+    fun normalizeRecords(records: Iterable<SavedArticleRecord>): List<SavedArticleRecord> =
         records
-            .mapNotNull(::decodeRecord)
             .groupBy { ArticleStates.id(it.item) }
             .values
             .map { matches ->

@@ -67,6 +67,31 @@ class ArticleStateTest {
     }
 
     @Test
+    fun savedRecordNormalizationUsesCodecDuplicateRules() {
+        val link = "https://example.com/duplicate"
+        val plainNewer =
+            SavedArticleRecord(
+                item = item(link = link, summary = "new metadata"),
+                savedAtMillis = 30L,
+            )
+        val offlineOlder =
+            SavedArticleRecord(
+                item = item(link = link, summary = "old offline"),
+                savedAtMillis = 20L,
+                offline = offline(content = "old body", storedAtMillis = 20L),
+            )
+        val offlineNewest =
+            offlineOlder.copy(
+                savedAtMillis = 40L,
+                offline = offline(content = "new body", storedAtMillis = 40L),
+            )
+
+        assertEquals(
+            listOf(offlineNewest),
+            SavedArticleCodec.normalizeRecords(listOf(plainNewer, offlineOlder, offlineNewest)),
+        )
+    }
+    @Test
     fun offlineLimitEvictsOldestBodyButKeepsSavedSnapshots() {
         val oldest =
             SavedArticleRecord(
