@@ -6,7 +6,7 @@ The Worker adds shared edge parsing and caching, feed discovery, HTML-to-Atom sc
 
 ## Deploy
 
-Production is connected directly to `2137x/kanarek` through Cloudflare Workers Builds. Changes under `worker/` on `main` run the Worker tests and deploy with Wrangler from `worker/`.
+Production is connected directly to `travnie/kanarek` through Cloudflare Workers Builds. Changes under `worker/` on `main` run the Worker tests and deploy with Wrangler from `worker/`.
 
 For an authorized manual deployment:
 
