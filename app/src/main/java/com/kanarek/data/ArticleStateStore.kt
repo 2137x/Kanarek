@@ -32,7 +32,11 @@ class ArticleStateStore(
             emitAll(
                 combine(context.articleStateDataStore.data, SAVED_REVISION) { prefs, _ ->
                     val now = nowMillis()
-                    val savedRecords = loadSavedRecords(prefs[KEY_SAVED].orEmpty())
+                    val savedRecords =
+                        SAVED_MUTEX.withLock {
+                            val latest = context.articleStateDataStore.data.first()
+                            loadSavedRecords(latest[KEY_SAVED].orEmpty())
+                        }
                     ArticleState(
                         readIds =
                             ArticleIdHistory.ids(
@@ -165,7 +169,7 @@ class ArticleStateStore(
                 if (record.offline != null) {
                     record
                 } else {
-                    record.copy(offline = offlineStore.read(ArticleStates.id(record.item)))
+                    record.copy(offline = offlineStore.read(record))
                 }
             }
         }
@@ -177,13 +181,19 @@ class ArticleStateStore(
     ) {
         val normalized = SavedArticleCodec.normalizeRecords(records)
         val bounded = OfflineArticles.enforceLimit(normalized, OFFLINE_CONTENT_LIMIT_BYTES)
-        withContext(Dispatchers.IO) { offlineStore.write(bounded) }
         val compact = compactRecords(bounded)
-        context.articleStateDataStore.edit { prefs ->
-            updatePreferences(prefs)
-            writeCompactRecords(prefs, compact)
+        val staged = withContext(Dispatchers.IO) { offlineStore.stage(bounded) }
+        try {
+            context.articleStateDataStore.edit { prefs ->
+                updatePreferences(prefs)
+                writeCompactRecords(prefs, compact)
+            }
+            withContext(Dispatchers.IO) { offlineStore.publish(staged) }
+        } catch (error: Exception) {
+            withContext(Dispatchers.IO) { offlineStore.discard(staged) }
+            throw error
         }
-        withContext(Dispatchers.IO) { offlineStore.pruneTo(bounded) }
+        withContext(Dispatchers.IO) { runCatching { offlineStore.pruneTo(bounded) } }
         bumpSavedRevision()
     }
 
@@ -194,11 +204,14 @@ class ArticleStateStore(
     private suspend fun migrateEmbeddedOfflineArticlesLocked() {
         val raw = context.articleStateDataStore.data.first()[KEY_SAVED].orEmpty()
         val records = SavedArticleCodec.decodeRecords(raw)
-        if (records.none { it.offline != null }) return
+        if (records.none { it.offline != null }) {
+            withContext(Dispatchers.IO) { runCatching { offlineStore.reconcile(records) } }
+            return
+        }
         val bounded = OfflineArticles.enforceLimit(records, OFFLINE_CONTENT_LIMIT_BYTES)
         val stored =
             runCatching {
-                withContext(Dispatchers.IO) { offlineStore.write(bounded) }
+                withContext(Dispatchers.IO) { offlineStore.writeMigration(bounded) }
             }.isSuccess
         if (!stored) return
 
@@ -210,10 +223,13 @@ class ArticleStateStore(
             migrated = true
         }
         if (migrated) {
-            withContext(Dispatchers.IO) { offlineStore.pruneTo(bounded) }
+            withContext(Dispatchers.IO) { runCatching { offlineStore.reconcile(compactRecordsAsRecords(compact)) } }
             bumpSavedRevision()
         }
     }
+
+    private fun compactRecordsAsRecords(records: Set<String>): List<SavedArticleRecord> =
+        SavedArticleCodec.decodeRecords(records)
 
     private fun compactRecords(records: List<SavedArticleRecord>): Set<String> =
         records.mapTo(linkedSetOf()) { record ->
