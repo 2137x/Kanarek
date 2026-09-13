@@ -42,6 +42,7 @@ internal class OfflineArticleStore internal constructor(
         if (offlineRecords.isEmpty()) return emptyList()
         ensureDirectory()
         val staged = mutableListOf<StagedPayload>()
+        var complete = false
         try {
             offlineRecords.forEach { record ->
                 val target = File(directory, fileName(ArticleStates.id(record.item)))
@@ -49,11 +50,11 @@ internal class OfflineArticleStore internal constructor(
                 staged += StagedPayload(temp = temp, target = target)
                 temp.writeText(SavedArticleCodec.encodeRecord(record), UTF_8)
             }
-        } catch (error: Exception) {
-            discard(staged)
-            throw error
+            complete = true
+            return staged
+        } finally {
+            if (!complete) discard(staged)
         }
-        return staged
     }
 
     fun publish(staged: Iterable<StagedPayload>) {

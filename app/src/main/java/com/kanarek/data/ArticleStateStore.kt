@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -183,15 +184,18 @@ class ArticleStateStore(
         val bounded = OfflineArticles.enforceLimit(normalized, OFFLINE_CONTENT_LIMIT_BYTES)
         val compact = compactRecords(bounded)
         val staged = withContext(Dispatchers.IO) { offlineStore.stage(bounded) }
+        var published = false
         try {
             context.articleStateDataStore.edit { prefs ->
                 updatePreferences(prefs)
                 writeCompactRecords(prefs, compact)
             }
             withContext(Dispatchers.IO) { offlineStore.publish(staged) }
-        } catch (error: Exception) {
-            withContext(Dispatchers.IO) { offlineStore.discard(staged) }
-            throw error
+            published = true
+        } finally {
+            if (!published) {
+                withContext(NonCancellable + Dispatchers.IO) { offlineStore.discard(staged) }
+            }
         }
         withContext(Dispatchers.IO) { runCatching { offlineStore.pruneTo(bounded) } }
         bumpSavedRevision()
