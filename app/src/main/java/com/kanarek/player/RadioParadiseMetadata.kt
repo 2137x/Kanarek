@@ -4,6 +4,7 @@ import com.kanarek.data.readBytesCapped
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
+import org.json.JSONObject
 
 internal data class RadioParadiseMetadata(
     val title: String,
@@ -37,18 +38,19 @@ internal fun radioParadiseChannel(streamUrl: String): Int? {
 }
 
 internal fun parseRadioParadiseMetadata(json: String): RadioParadiseMetadata? {
-    val title = jsonString(json, "title").orEmpty().trim()
-    val artist = jsonString(json, "artist").orEmpty().trim()
+    val payload = runCatching { JSONObject(json) }.getOrNull() ?: return null
+    val title = payload.stringOrNull("title").orEmpty()
+    val artist = payload.stringOrNull("artist").orEmpty()
     if (title.isEmpty() && artist.isEmpty()) return null
 
-    val seconds = jsonNumber(json, "time")?.toDoubleOrNull()?.toLong() ?: DEFAULT_REFRESH_SECONDS
+    val seconds = payload.opt("time")?.toString()?.toDoubleOrNull()?.toLong() ?: DEFAULT_REFRESH_SECONDS
     return RadioParadiseMetadata(
         title = title,
         artist = artist,
-        album = jsonString(json, "album")?.trim()?.takeIf(String::isNotEmpty),
+        album = payload.stringOrNull("album"),
         artworkUrl =
             sequenceOf("cover_med", "cover", "cover_small")
-                .mapNotNull { jsonString(json, it) }
+                .mapNotNull(payload::stringOrNull)
                 .mapNotNull(::safeRadioParadiseArtworkUrl)
                 .firstOrNull(),
         refreshAfterMillis =
@@ -79,38 +81,8 @@ internal fun fetchRadioParadiseMetadata(channel: Int): RadioParadiseMetadata? {
     }
 }
 
-private fun jsonString(
-    json: String,
-    key: String,
-): String? {
-    val pattern = Regex("\\\"${Regex.escape(key)}\\\"\\s*:\\s*\\\"((?:\\\\.|[^\\\"\\\\])*)\\\"")
-    val encoded = pattern.find(json)?.groupValues?.get(1) ?: return null
-    return decodeJsonString(encoded)
-}
-
-private fun jsonNumber(
-    json: String,
-    key: String,
-): String? =
-    Regex("\\\"${Regex.escape(key)}\\\"\\s*:\\s*\\\"?(-?\\d+(?:\\.\\d+)?)")
-        .find(json)
-        ?.groupValues
-        ?.get(1)
-
-private fun decodeJsonString(encoded: String): String? {
-    if (INVALID_JSON_ESCAPE.containsMatchIn(encoded)) return null
-    return JSON_ESCAPE.replace(encoded) { match ->
-        when (val escape = match.value.drop(1)) {
-            "\"", "\\", "/" -> escape
-            "b" -> "\b"
-            "f" -> "\u000C"
-            "n" -> "\n"
-            "r" -> "\r"
-            "t" -> "\t"
-            else -> escape.drop(1).toInt(16).toChar().toString()
-        }
-    }
-}
+private fun JSONObject.stringOrNull(key: String): String? =
+    takeUnless { isNull(key) }?.optString(key)?.trim()?.takeIf(String::isNotEmpty)
 
 private fun safeRadioParadiseArtworkUrl(value: String): String? {
     val uri = runCatching { URI(value.trim()) }.getOrNull() ?: return null
@@ -121,8 +93,6 @@ private fun safeRadioParadiseArtworkUrl(value: String): String? {
     }
 }
 
-private val JSON_ESCAPE = Regex("""\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})""")
-private val INVALID_JSON_ESCAPE = Regex("""\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})""")
 private const val RADIO_PARADISE_HOST = "radioparadise.com"
 private const val RADIO_PARADISE_API = "https://api.radioparadise.com/api/now_playing"
 private const val HTTP_TIMEOUT_MS = 6_000
