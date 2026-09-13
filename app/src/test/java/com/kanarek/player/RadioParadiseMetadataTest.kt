@@ -3,7 +3,12 @@ package com.kanarek.player
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class RadioParadiseMetadataTest {
     @Test
     fun mapsBundledMixUrls() {
@@ -56,5 +61,7 @@ class RadioParadiseMetadataTest {
     fun rejectsEmptyOrMalformedMetadata() {
         assertNull(parseRadioParadiseMetadata("{}"))
         assertNull(parseRadioParadiseMetadata("not json"))
+        assertNull(parseRadioParadiseMetadata("""{"title":{"unexpected":1}}"""))
+        assertNull(parseRadioParadiseMetadata("""{"artist":42}"""))
     }
 }
