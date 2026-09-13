@@ -61,5 +61,7 @@ class RadioParadiseMetadataTest {
     fun rejectsEmptyOrMalformedMetadata() {
         assertNull(parseRadioParadiseMetadata("{}"))
         assertNull(parseRadioParadiseMetadata("not json"))
+        assertNull(parseRadioParadiseMetadata("""{"title":{"unexpected":1}}"""))
+        assertNull(parseRadioParadiseMetadata("""{"artist":42}"""))
     }
 }

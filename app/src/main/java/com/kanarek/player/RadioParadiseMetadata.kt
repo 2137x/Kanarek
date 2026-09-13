@@ -82,7 +82,7 @@ internal fun fetchRadioParadiseMetadata(channel: Int): RadioParadiseMetadata? {
 }
 
 private fun JSONObject.stringOrNull(key: String): String? =
-    takeUnless { isNull(key) }?.optString(key)?.trim()?.takeIf(String::isNotEmpty)
+    (opt(key) as? String)?.trim()?.takeIf(String::isNotEmpty)
 
 private fun safeRadioParadiseArtworkUrl(value: String): String? {
     val uri = runCatching { URI(value.trim()) }.getOrNull() ?: return null
