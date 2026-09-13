@@ -54,7 +54,7 @@ Prefer portable `commonMain` code when it is naturally platform-independent, but
 
 **Risk:** operational.
 
-`docs/DEVELOPMENT.md` notes that standalone GitHub release signing depends on repository secrets in `2137x/kanarek`. Secret values cannot be verified from repository contents.
+`docs/DEVELOPMENT.md` notes that standalone GitHub release signing depends on repository secrets in `travnie/kanarek`. Secret values cannot be verified from repository contents.
 
 **Current mitigation:** Gradle release signing is optional so unsigned/F-Droid downstream builds remain possible.
 

@@ -650,7 +650,7 @@ async function fetchRadioBrowser(mirror: string, params: URLSearchParams): Promi
   try {
     const res = await fetch(`https://${mirror}/json/stations/search?${params.toString()}`, {
       signal: ctrl.signal,
-      headers: { "user-agent": "kanarek/1.0 (+https://github.com/2137x/kanarek)" },
+      headers: { "user-agent": "kanarek/1.0 (+https://github.com/travnie/kanarek)" },
       cf: { cacheTtl: CACHE_TTL_S, cacheEverything: true },
     });
     if (!res.ok) throw new Error(`${mirror}: HTTP ${res.status}`);
@@ -721,7 +721,7 @@ async function getLogoMap(env: Env, ctx: ExecutionContext): Promise<Record<strin
   try {
     const res = await fetch(IPTV_ORG_LOGOS, {
       signal: ctrl.signal,
-      headers: { "user-agent": "kanarek/1.0 (+https://github.com/2137x/kanarek)", accept: "application/json" },
+      headers: { "user-agent": "kanarek/1.0 (+https://github.com/travnie/kanarek)", accept: "application/json" },
       cf: { cacheTtl: IPTV_LOGO_TTL_S, cacheEverything: true },
     });
     if (res.ok) map = buildLogoMap((await res.json()) as IptvLogo[]);
@@ -795,7 +795,7 @@ async function fetchText(target: string, timeoutMs: number, env: Env): Promise<s
   try {
     const res = await fetchOutbound(target, env, {
       signal: ctrl.signal,
-      headers: { "user-agent": "kanarek/1.0 (+https://github.com/2137x/kanarek)", accept: "text/html, application/xhtml+xml, application/xml, text/xml" },
+      headers: { "user-agent": "kanarek/1.0 (+https://github.com/travnie/kanarek)", accept: "text/html, application/xhtml+xml, application/xml, text/xml" },
       cf: { cacheTtl: CACHE_TTL_S, cacheEverything: true },
     });
     if (!res.ok) throw new Error(`${target}: HTTP ${res.status}`);
@@ -811,7 +811,7 @@ async function fetchFeed(feedUrl: string, env: Env): Promise<NewsItem[]> {
   try {
     const res = await fetchOutbound(feedUrl, env, {
       signal: ctrl.signal,
-      headers: { "user-agent": "kanarek/1.0 (+https://github.com/2137x/kanarek)", accept: "application/rss+xml, application/atom+xml, application/xml, text/xml" },
+      headers: { "user-agent": "kanarek/1.0 (+https://github.com/travnie/kanarek)", accept: "application/rss+xml, application/atom+xml, application/xml, text/xml" },
       cf: { cacheTtl: CACHE_TTL_S, cacheEverything: true },
     });
     if (!res.ok) throw new Error(`${feedUrl}: HTTP ${res.status}`);
