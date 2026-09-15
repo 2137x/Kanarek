@@ -8,21 +8,50 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.kanarek.data.AppThemeMode
-
-private val DarkColors =
-    darkColorScheme(
-        primary = AccentDark,
-        background = DarkBg,
-        surface = DarkSurface,
-    )
 
 private val LightColors =
     lightColorScheme(
         primary = Accent,
+        onPrimary = Color.White,
+        primaryContainer = AccentContainer,
+        onPrimaryContainer = LightText,
+        secondary = Accent,
+        onSecondary = Color.White,
+        secondaryContainer = AccentContainer,
+        onSecondaryContainer = LightText,
+        tertiary = Signal,
+        onTertiary = Color(0xFF3D2900),
         background = LightBg,
+        onBackground = LightText,
         surface = LightSurface,
+        onSurface = LightText,
+        surfaceVariant = LightSurfaceMuted,
+        onSurfaceVariant = LightTextMuted,
+        outline = LightBorder,
+    )
+
+private val DarkColors =
+    darkColorScheme(
+        primary = AccentDark,
+        onPrimary = Color(0xFF00315C),
+        primaryContainer = AccentContainerDark,
+        onPrimaryContainer = DarkText,
+        secondary = AccentDark,
+        onSecondary = Color(0xFF00315C),
+        secondaryContainer = AccentContainerDark,
+        onSecondaryContainer = DarkText,
+        tertiary = SignalDark,
+        onTertiary = Color(0xFF422D00),
+        background = DarkBg,
+        onBackground = DarkText,
+        surface = DarkSurface,
+        onSurface = DarkText,
+        surfaceVariant = DarkSurfaceMuted,
+        onSurfaceVariant = DarkTextMuted,
+        outline = DarkBorder,
     )
 
 @Composable
@@ -45,13 +74,13 @@ fun KanarekTheme(
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             }
 
-            darkTheme -> {
-                DarkColors
-            }
-
-            else -> {
-                LightColors
-            }
+            darkTheme -> DarkColors
+            else -> LightColors
         }
-    MaterialTheme(colorScheme = colorScheme, typography = KanarekTypography, content = content)
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = KanarekTypography,
+        shapes = KanarekShapes,
+        content = content,
+    )
 }
