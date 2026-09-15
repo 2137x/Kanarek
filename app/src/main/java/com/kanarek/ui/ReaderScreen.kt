@@ -103,7 +103,8 @@ internal fun ReaderScreen(
         rememberSaveable(stateSaver = ReaderNavigationStateSaver) {
             mutableStateOf(ReaderNavigationState())
         }
-    val readerTopBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val readerTopBarScrollBehavior =
+        remember(navigation.route) { TopAppBarDefaults.exitUntilCollapsedScrollBehavior() }
     var filters by
         rememberSaveable(stateSaver = ReaderFilterStateSaver) {
             mutableStateOf(ReaderFilterState())
