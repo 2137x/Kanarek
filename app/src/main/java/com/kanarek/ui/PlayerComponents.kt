@@ -704,7 +704,7 @@ private fun StationRow(
                 .fillMaxWidth()
                 .background(
                     if (isCurrent) {
-                        MaterialTheme.colorScheme.secondaryContainer
+                        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.14f)
                     } else {
                         Color.Transparent
                     },
@@ -728,12 +728,8 @@ private fun StationRow(
                         } else {
                             MaterialTheme.typography.bodyLarge
                         },
-                    color =
-                        if (isCurrent) {
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
+                    color = MaterialTheme.colorScheme.onSurface,
+
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -744,7 +740,7 @@ private fun StationRow(
                     style = MaterialTheme.typography.bodySmall,
                     color =
                         if (isCurrent) {
-                            MaterialTheme.colorScheme.onSecondaryContainer
+                            MaterialTheme.colorScheme.onSurface
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         },
