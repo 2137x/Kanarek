@@ -273,7 +273,7 @@ private fun RichStationLogo(
         modifier =
             Modifier
                 .size(size)
-                .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center,
     ) {
