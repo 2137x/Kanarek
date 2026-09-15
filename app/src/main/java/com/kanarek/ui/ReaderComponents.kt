@@ -39,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -48,6 +49,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -90,7 +92,35 @@ internal fun ReaderTopBar(
     onMenu: () -> Unit,
     onRefresh: () -> Unit,
     onSettings: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
+    if (route == ReaderRoute.READER) {
+        LargeTopAppBar(
+            title = { Text(stringResource(R.string.home_news)) },
+            navigationIcon = {
+                IconButton(onClick = onMenu) {
+                    Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.menu))
+                }
+            },
+            actions = {
+                IconButton(onClick = onRefresh) {
+                    Icon(
+                        Icons.Filled.Refresh,
+                        contentDescription = stringResource(R.string.refresh_preview),
+                    )
+                }
+                IconButton(onClick = onSettings) {
+                    Icon(
+                        Icons.Filled.Settings,
+                        contentDescription = stringResource(R.string.settings),
+                    )
+                }
+            },
+            scrollBehavior = scrollBehavior,
+        )
+        return
+    }
+
     TopAppBar(
         title = {
             Text(
@@ -106,33 +136,11 @@ internal fun ReaderTopBar(
             )
         },
         navigationIcon = {
-            if (route != ReaderRoute.READER) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.close),
-                    )
-                }
-            } else {
-                IconButton(onClick = onMenu) {
-                    Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.menu))
-                }
-            }
-        },
-        actions = {
-            if (route == ReaderRoute.READER) {
-                IconButton(onClick = onRefresh) {
-                    Icon(
-                        Icons.Filled.Refresh,
-                        contentDescription = stringResource(R.string.refresh_preview),
-                    )
-                }
-                IconButton(onClick = onSettings) {
-                    Icon(
-                        Icons.Filled.Settings,
-                        contentDescription = stringResource(R.string.settings),
-                    )
-                }
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.close),
+                )
             }
         },
     )

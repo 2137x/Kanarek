@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kanarek.R
@@ -101,6 +104,8 @@ internal fun ReaderScreen(
         rememberSaveable(stateSaver = ReaderNavigationStateSaver) {
             mutableStateOf(ReaderNavigationState())
         }
+    val readerTopBarScrollBehavior =
+        key(navigation.route) { TopAppBarDefaults.exitUntilCollapsedScrollBehavior() }
     var filters by
         rememberSaveable(stateSaver = ReaderFilterStateSaver) {
             mutableStateOf(ReaderFilterState())
@@ -314,6 +319,12 @@ internal fun ReaderScreen(
     }
 
     Scaffold(
+        modifier =
+            if (navigation.route == ReaderRoute.READER) {
+                Modifier.nestedScroll(readerTopBarScrollBehavior.nestedScrollConnection)
+            } else {
+                Modifier
+            },
         topBar = {
             ReaderTopBar(
                 route = navigation.route,
@@ -323,6 +334,7 @@ internal fun ReaderScreen(
                 onSettings = {
                     navigation = navigation.open(ReaderRoute.SETTINGS)
                 },
+                scrollBehavior = readerTopBarScrollBehavior,
             )
         },
     ) { padding ->
