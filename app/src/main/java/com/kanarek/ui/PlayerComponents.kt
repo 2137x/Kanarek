@@ -704,7 +704,7 @@ private fun StationRow(
                 .fillMaxWidth()
                 .background(
                     if (isCurrent) {
-                        MaterialTheme.colorScheme.secondaryContainer
+                        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.14f)
                     } else {
                         Color.Transparent
                     },
@@ -730,7 +730,7 @@ private fun StationRow(
                         },
                     color =
                         if (isCurrent) {
-                            MaterialTheme.colorScheme.onSecondaryContainer
+                            MaterialTheme.colorScheme.onSurface
                         } else {
                             MaterialTheme.colorScheme.onSurface
                         },
@@ -744,7 +744,7 @@ private fun StationRow(
                     style = MaterialTheme.typography.bodySmall,
                     color =
                         if (isCurrent) {
-                            MaterialTheme.colorScheme.onSecondaryContainer
+                            MaterialTheme.colorScheme.onSurface
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         },
