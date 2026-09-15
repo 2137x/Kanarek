@@ -16,6 +16,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -104,7 +105,7 @@ internal fun ReaderScreen(
             mutableStateOf(ReaderNavigationState())
         }
     val readerTopBarScrollBehavior =
-        remember(navigation.route) { TopAppBarDefaults.exitUntilCollapsedScrollBehavior() }
+        key(navigation.route) { TopAppBarDefaults.exitUntilCollapsedScrollBehavior() }
     var filters by
         rememberSaveable(stateSaver = ReaderFilterStateSaver) {
             mutableStateOf(ReaderFilterState())
