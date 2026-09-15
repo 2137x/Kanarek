@@ -728,12 +728,8 @@ private fun StationRow(
                         } else {
                             MaterialTheme.typography.bodyLarge
                         },
-                    color =
-                        if (isCurrent) {
-                            MaterialTheme.colorScheme.onSurface
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
+                    color = MaterialTheme.colorScheme.onSurface,
+
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
