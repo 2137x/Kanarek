@@ -23,8 +23,10 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -76,7 +78,7 @@ internal fun RichPlayerBottomControls(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
+                        .height(56.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
@@ -209,9 +211,25 @@ private fun PlayerControlButtons(
             modifier = Modifier.size(30.dp),
         )
     }
-    IconButton(
+    val playbackActive = playerState.isPlaying || playerState.isBuffering
+    FilledTonalIconButton(
         onClick = actions.onTogglePlayback,
-        modifier = Modifier.size(52.dp),
+        modifier = Modifier.size(56.dp),
+        colors =
+            IconButtonDefaults.filledTonalIconButtonColors(
+                containerColor =
+                    if (playbackActive) {
+                        MaterialTheme.colorScheme.tertiaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.primaryContainer
+                    },
+                contentColor =
+                    if (playbackActive) {
+                        MaterialTheme.colorScheme.onTertiaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    },
+            ),
     ) {
         Icon(
             if (playerState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
